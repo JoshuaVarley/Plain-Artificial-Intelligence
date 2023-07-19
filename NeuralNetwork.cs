@@ -8,6 +8,7 @@ namespace NeuralNetwork {
 
 		/*
 			INIT NETWORK.
+			TODO: REWORK THIS, CONNECTION IS NOT SET PROPERLY, NEEDS OUTPUT NODE.
 		*/
         public Network(int[] layerLengths){
 
@@ -43,28 +44,36 @@ namespace NeuralNetwork {
 			return this.layers[layers.Length-1].getLayerValues();
 		}
 
-		private void TrainIteration(int epochs, double trainingStep, int batch){
-			
+		private void TrainIteration(){
+
+		}
+
+		private void Train(int epochs, double trainingStep, int batch, int iterations){
+			for(int epochIndex = 0; epochIndex<epochs; epochIndex++){
+				for(int iterationIndex = 0; iterationIndex<iterations; iterationIndex++){
+					TrainIteration();
+				} 
+			}
 		}
 
 		/*
 			ERROR.
 		*/
-		private static double[] errorArray(double[] calculated, double[] expected){
-			double[] temp = new double[calculated.Length];
-			for(int i = 0; i < calculated.Length; i++){
-				temp[i]=(expected[i]-calculated[i]);
-			}
-			return temp;
+		private static double errorSq(double calculated, double target){
+			double diff = target-calculated;
+			return (diff*diff);
 		}
 
+		private static double errorSqDerivative(double calculated, double target){
+			return -2*(target-calculated); // With respect to calculated.
+		}
 
 		private static double[] errorSqArray(double[] calculated, double[] expected){
-			double[] errorArr = errorArray(calculated,expected);
-			for(int i = 0; i < errorSqArr.Length; i++){
-				errorArr[i]*=errorArr[i];
+			double[] errorSqArr=new double[layerNodes.Length];
+			for(int i = 0; i < calculated.Length; i++){
+				errorSqArr[i]=errorSq(calculated[i], expected[i]);
 			}
-			return errorArr;
+			return errorSqArr;
 		}
 
 		/*
@@ -96,8 +105,6 @@ namespace NeuralNetwork {
 			MSE/=totalCounts;
 			return MSE;
 		}
-
-
 
 		//Layer of nodes.
         private class Layer{
@@ -138,9 +145,9 @@ namespace NeuralNetwork {
 
 		//One node (neuron).
         private class Node {
-            private Connection[] inputConnections;
+            public Connection[] inputConnections;
 			public double value;
-			private double bias;
+			public double bias;
 			private double biasDerivative = 0d;
 			private double errorTotal= 0d;
             public Node(Connection[] inputConnections, double value = 0d, double bias = 0d, double errorTotal=0d){
@@ -158,12 +165,19 @@ namespace NeuralNetwork {
 				this.bias+=trainingStep*dBias;
 			}
 
+			public void updateBiasDerivative(bool outputLayer){
+				double errorOutputNode = 
+				double valueInputNode = 
+				double valueOutputNode = 
+				double activationDerivative = 
+				this.biasDerivative = 
+			}
 
 			public void updateNodeValue(bool outputLayer){
 				double tmpVal = this.bias; 
 				foreach (Connection connection in this.inputConnections)
 				{
-					tmpVal+=connection.node.value*connection.weight;
+					tmpVal+=connection.nodeIn.value*connection.weight;
 				}
 				this.value = Activation(tmpVal,outputLayer);
 			}
@@ -201,19 +215,35 @@ namespace NeuralNetwork {
 			/*
 				ERROR CALCULATION.
 			*/
+			//Hidden Error.
+			public void setHiddenError(Connection[] connections){
+				double sumAllWeights = Connection.sumAllWeights(connections);
+				double hiddenError = 0d;
+				for(int i = 0; i < connections.Length; i++){
+					double error = connections[i].nodeOut.errorTotal*((connections[i].weight)/(sumAllWeights));
+					hiddenError+=error;
+				}
+				this.errorTotal=hiddenError;
+			}
+
+			public void setOutputError(double target){
+				this.errorTotal=errorSq(this.value,target); 
+			}
         }
 
 		//Connection from one node to another.
 		private class Connection {
-			public Node node;
+			public Node nodeIn;
+			public Node nodeOut;
 			public double weight;
 			public double weightDerivative = 0d;
 
 
-			//NOTE: weight is, unless specified otherwise, init randomly between [-1,1].
-			public Connection(Node node, double weight = ((new Random()).NextDouble()*2-1)){
-				this.node = node;
-				this.weight = weight;	
+			//NOTE: weight is, unless specified otherwise, init randomly between [-/sqrt(InputLength),1/sqrt(InputLength)].
+			public Connection(Node nodeIn,Node nodeOut, double weight = ((new Random()).NextDouble()*(2/Math.Sqrt(layers[0].Length))-(1/Math.Sqrt(layers[0].Length)))){
+				this.nodeIn = nodeIn;
+				this.nodeOut = nodeOut;
+				this.weight = weight;
 			}
 
 			/*
@@ -229,6 +259,15 @@ namespace NeuralNetwork {
 					totalW+=connections[i].weight;
 				}
 				return totalW;
+			}
+
+			public void updateWeightDerivative(bool outputLayer){
+				double errorOutputNode = this.nodeOut.errorTotal;
+				double valueInputNode = this.nodeIn.value;
+				double valueOutputNode = this.nodeOut.value;
+				//TODO: CHECK IF SUPPOSED TO BE VALUEOUTPUTNODE, REMEMBER THAT IS AFTER IT HAS BEEN GONE THROUGH AN ACTIVATION FUNCTION.
+				double activationDerivative = Node.Activation_Derivative(valueOutputNode,outputLayer)*valueInputNode;
+				this.weightDerivative = errorOutputNode*activationDerivative;
 			}
 		}
     }
