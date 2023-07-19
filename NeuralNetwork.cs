@@ -166,11 +166,8 @@ namespace NeuralNetwork {
 			}
 
 			public void updateBiasDerivative(bool outputLayer){
-				double errorOutputNode = 
-				double valueInputNode = 
-				double valueOutputNode = 
-				double activationDerivative = 
-				this.biasDerivative = 
+				double error = this.errorTotal;
+				this.biasDerivative = error;
 			}
 
 			public void updateNodeValue(bool outputLayer){
@@ -265,7 +262,6 @@ namespace NeuralNetwork {
 				double errorOutputNode = this.nodeOut.errorTotal;
 				double valueInputNode = this.nodeIn.value;
 				double valueOutputNode = this.nodeOut.value;
-				//TODO: CHECK IF SUPPOSED TO BE VALUEOUTPUTNODE, REMEMBER THAT IS AFTER IT HAS BEEN GONE THROUGH AN ACTIVATION FUNCTION.
 				double activationDerivative = Node.Activation_Derivative(valueOutputNode,outputLayer)*valueInputNode;
 				this.weightDerivative = errorOutputNode*activationDerivative;
 			}
