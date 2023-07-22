@@ -1,6 +1,7 @@
 using System;
 
 namespace NeuralNetwork {
+
     public class Network {
         public Layer[] layers;
 
@@ -57,6 +58,8 @@ namespace NeuralNetwork {
 				bool outputLayer = (i==this.layers.Length-1);
 				for(int j = 0; j < this.layers[i].nodes.Length; j++){
 					Node node = this.layers[i].nodes[j];
+					node.updateBiasDerivative(outputLayer);
+					node.updateBias(trainingStep, node.biasDerivative);
 					if(outputLayer){
 						node.setOutputError(expectedOutput[j]);
 					} else {
@@ -71,7 +74,7 @@ namespace NeuralNetwork {
 			}
 		}
 
-		private void Train(int epochs, double trainingStep, int batch, double[,] trainingDataInput, double[,] trainingDataOutput, double[,] testDataInput, double[,] testDataOutput){
+		public void Train(int epochs, double trainingStep, double[,] trainingDataInput, double[,] trainingDataOutput, double[,] testDataInput, double[,] testDataOutput){
 			//Train.
 			for(int epochIndex = 0; epochIndex<epochs; epochIndex++){
 				for(int iterationIndex = 0; iterationIndex<trainingDataInput.Length; iterationIndex++){
@@ -87,9 +90,13 @@ namespace NeuralNetwork {
 				} 
 			}
 			//Test.
+			double[,] calculatedTest = new double[,];
+			for(int testDataIndex = 0; testDataIndex<testDataInput.Length; testDataIndex++){
+				calculatedTest[testDataIndex] = this.CalculateOutputs(testDataInput[testDataIndex])
+			}
+			double MSE_TEST = MSE_COST(calculatedTest, testDataOutput);
 			Console.WriteLine(
-					@$"
-					Total Avg. MSE: 
+					@$"Total Avg. MSE: {MSE_TEST}
 					--------------------------------------");
 		}
 
