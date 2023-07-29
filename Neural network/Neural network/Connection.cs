@@ -28,6 +28,7 @@
             double v = weightVelocity * momentum - weightDerivative * trainingStep;
             weightVelocity = v;
             weight += v;
+            weightDerivative = 0d;
         }
 
         /*

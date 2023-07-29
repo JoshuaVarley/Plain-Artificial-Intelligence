@@ -86,23 +86,8 @@ namespace NeuralNetwork {
             }
         }
 
-		private void ClearGradients()
-		{
-			for(int i = layers.Length-2; i>=0; i--)
-			{
-				Layer layer = layers[i];
-				foreach(Node node in layer.nodes)
-				{
-					node.biasDerivative = 0d;
-					foreach(Connection outputCon in node.outputConnections){
-						outputCon.weightDerivative = 0d;
-					}
-				}
-			}
-		}
 
-
-        //Mini-batch gradient descent iteration
+        //Stochastic gradient descent iteration with momentum.
         private void SGD(int batch, double trainingStep, double momentum, double[][] dataInput, double[][] dataOutput)
 		{
 			Random rand = new();
@@ -114,7 +99,6 @@ namespace NeuralNetwork {
                 UpdateGradients(batchOutput);
             }
 			ApplyGradients(trainingStep/batch, momentum);
-            ClearGradients();
         }
 
 		public void Train(int epochs, int iterations, int batch, double trainingStep, double momentum, double[][] trainingDataInput, double[][] trainingDataOutput)

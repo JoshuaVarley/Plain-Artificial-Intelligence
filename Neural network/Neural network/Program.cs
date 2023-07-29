@@ -6,7 +6,7 @@ namespace NeuralNetwork
 	{
 		public static void Main(string[] args)
 		{
-			var network = new Network(new int[] { 784, 250, 50, 10 });
+			var network = new Network(new int[] { 784, 15, 10 });
  
 			double[][] trainInput;
 			double[][] trainOutput;
@@ -30,7 +30,7 @@ namespace NeuralNetwork
 			}
 
 			Console.WriteLine("Training...");
-			network.Train(1, 1000, 128, 0.1d, 0.9d, trainInput, trainOutput);
+			network.Train(85, 60000, 16, 0.1d, 0.9d, trainInput, trainOutput);
 			Console.WriteLine("Testing...");
 			network.Test(testInput, testOutput);
 		}

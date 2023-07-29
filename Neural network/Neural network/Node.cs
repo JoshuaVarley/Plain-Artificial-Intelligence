@@ -27,6 +27,7 @@
             double v = biasVelocity * momentum - biasDerivative * trainingStep;
             biasVelocity = v;
             bias += v;
+            biasDerivative = 0d;
         }
 
         public void AddBiasDerivative()
