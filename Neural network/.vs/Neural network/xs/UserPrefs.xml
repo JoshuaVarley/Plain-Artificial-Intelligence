@@ -1,26 +1,19 @@
 ﻿<Properties StartupConfiguration="{71371257-152E-4B6A-9AB4-A1987727BEFE}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Neural network/NeuralNetwork.cs">
+  <MonoDevelop.Ide.ItemProperties.Neural_220network PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Neural network/Program.cs">
     <Files>
-      <File FileName="Neural network/Program.cs" Line="5" Column="1" />
-      <File FileName="Neural network/NeuralNetwork.cs" Line="18" Column="58" />
+      <File FileName="Neural network/Program.cs" Line="34" Column="2" />
+      <File FileName="Neural network/NeuralNetwork.cs" />
+      <File FileName="Neural network/Layer.cs" />
+      <File FileName="Neural network/Connection.cs" />
+      <File FileName="Neural network/Node.cs" />
+      <File FileName="Neural network/Cost.cs" />
     </Files>
-    <Pads>
-      <Pad Id="ProjectPad">
-        <State name="__root__">
-          <Node name="Neural network" expanded="True">
-            <Node name="Neural network" expanded="True">
-              <Node name="NeuralNetwork.cs" selected="True" />
-            </Node>
-          </Node>
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
+  <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.ItemProperties.Neural_220network PreferredExecutionTarget="MonoDevelop.Default" />
 </Properties>

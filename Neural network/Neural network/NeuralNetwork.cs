@@ -1,7 +1,4 @@
-using System;
-
 namespace NeuralNetwork {
-
     public class Network {
         public Layer[] layers;
 
@@ -10,309 +7,134 @@ namespace NeuralNetwork {
 		*/
         public Network(int[] layerLengths){
 			this.layers = new Layer[layerLengths.Length];
-        	//First layer, this layer can't have input nodes, so a remedy is just to have a fake one.
-            Node[] inputNodes = new Node[layerLengths[0]];
-            layers[0] = new Layer(inputNodes);
 
-            //Middle layers & Last layer.
-            for(int i = 1; i < layerLengths.Length; i++){
-				Node[] layerInputNodes = layers[i-1].nodes;
+            //INIT NODES.
+            for(int i = 0; i < layerLengths.Length; i++){
 				Node[] layerNodes = new Node[layerLengths[i]];
-				bool outputLayer = (i==layerLengths.Length-1);
-				Node[] layerOutputNodes = (outputLayer) ? new Node[1] : layers[i+1].nodes;
-				for(int nodeI = 0; nodeI < layerLengths[i]; nodeI++){
-					Connection[] connectionsInput = new Connection[layerLengths[i-1]];
-					Node newNode = new Node(connectionsInput);
-					for(int inputConnectionI = 0; inputConnectionI < layerLengths[i-1]; inputConnectionI++){
-						connectionsInput[inputConnectionI]=new Connection(layerInputNodes[inputConnectionI], newNode, ((new Random()).NextDouble() * (2 / Math.Sqrt(layers[0].nodes.Length)) - (1 / Math.Sqrt(layers[0].nodes.Length))));
-					}
-                    newNode.inputConnections = connectionsInput;
-                    if (!outputLayer){
-						Connection[] connectionsOutput = new Connection[layerLengths[i+1]];
-						for(int outputtConnectionI = 0; outputtConnectionI < layerLengths[i+1]; outputtConnectionI++){
-							connectionsOutput[outputtConnectionI]=new Connection(newNode, layerOutputNodes[outputtConnectionI], ((new Random()).NextDouble() * (2 / Math.Sqrt(layers[0].nodes.Length)) - (1 / Math.Sqrt(layers[0].nodes.Length))));
-						}
-						newNode.outputConnections=connectionsOutput;
-					}
-					layerNodes[nodeI]=newNode;
-				}
-				layers[i] = new Layer(layerNodes);
-            }     
-        }
-
-		/*
-			FORWARD* AND (STOCHASTIC) BACKPROPAGATION
-		*/
-		public double[] CalculateOutputs(double[] inputValues){
-			this.layers[0].setLayerValues(inputValues);
-			for(int i = 1; i < this.layers.Length; i++){
-				//Different activation function for output layer.
-				bool outputLayer = (i==this.layers.Length-1);
-				this.layers[i].updateValues(outputLayer);
-			}
-			return this.layers[layers.Length-1].getLayerValues();
-		}
-
-		private void TrainIteration(double[] expectedOutput, double trainingStep){
-			for(int i = this.layers.Length-1; i > 0; i--){
-				bool outputLayer = (i==this.layers.Length-1);
-				for(int j = 0; j < this.layers[i].nodes.Length; j++){
-					Node node = this.layers[i].nodes[j];
-					node.updateBiasDerivative(outputLayer);
-					node.updateBias(trainingStep, node.biasDerivative);
-					if(outputLayer){
-						node.setOutputError(expectedOutput[j]);
-					} else {
-						node.setHiddenError(node.outputConnections); //CONNECTIONS LEADING FROM THIS TO THE OUTPUT LAYER NEEDED.
-					}
-					node.setErrorDerivative();
-					foreach(Connection connection in node.inputConnections){
-						connection.updateWeightDerivative(outputLayer);
-						connection.updateWeight(trainingStep, connection.weightDerivative);
-					}
-				}
-			}
-		}
-
-		public void Train(int epochs, double trainingStep, double[][] trainingDataInput, double[][] trainingDataOutput, double[][] testDataInput, double[][] testDataOutput){
-			//Train.
-			for(int epochIndex = 0; epochIndex<epochs; epochIndex++){
-				for(int iterationIndex = 0; iterationIndex<trainingDataInput.Length; iterationIndex++){
-					double[] output = this.CalculateOutputs(trainingDataInput[iterationIndex]);
-					double currentLoss = MSE_LOSS(output,trainingDataOutput[iterationIndex]);
-					Console.WriteLine(
-					@$"
-					Current epoch : {epochIndex+1}
-					Current iteration: {iterationIndex+1}
-					Current loss: {currentLoss}
-					--------------------------------------");
-					TrainIteration(trainingDataOutput[iterationIndex], trainingStep);
-				} 
-			}
-			//Test.
-			double[][] calculatedTest = new double[testDataInput.Length][];
-			for(int testDataIndex = 0; testDataIndex<testDataInput.Length; testDataIndex++){
-				calculatedTest[testDataIndex] = this.CalculateOutputs(testDataInput[testDataIndex]);
-			}
-			double MSE_TEST = MSE_COST(calculatedTest, testDataOutput);
-			Console.WriteLine(
-					@$"Total Avg. MSE: {MSE_TEST}
-					--------------------------------------");
-		}
-
-		/*
-			ERROR.
-		*/
-		private static double errorSq(double calculated, double target){
-			double diff = target-calculated;
-			return (diff*diff);
-		}
-
-		private static double[] errorSqArray(double[] calculated, double[] expected){
-			double[] errorSqArr = new double[expected.Length];
-			for(int i = 0; i < calculated.Length; i++){
-				errorSqArr[i]=errorSq(calculated[i], expected[i]);
-			}
-			return errorSqArr;
-		}
-
-		/*
-			LOSS. (Loss is over a single iteration of one set expects and calculates).
-		*/
-		private static double MSE_LOSS(double[] calculated, double[] expected){
-			double[] errorSq = errorSqArray(calculated,expected);
-			double MSE = 0d;
-			for(int i = 0; i < errorSq.Length; i++){
-				MSE+=(errorSq[i]);
-			}
-			MSE/=(errorSq.Length);
-			return MSE;
-		}
-
-		/*	
-			COST. (Cost is over a whole dataset of expects and calculates).
-		*/
-		private static double MSE_COST(double[][] calculated, double[][] expected){
-			double MSE=0d;
-			int totalCounts = 0;
-			for(int i = 0; i < calculated.Length; i++){
-				double[] errorSq = errorSqArray(calculated[i], expected[i]);
-				for(int j = 0; j < errorSq.Length; j++){
-					MSE+=(errorSq[j]);
-				}
-				totalCounts+=errorSq.Length;
-			}
-			MSE/=totalCounts;
-			return MSE;
-		}
-
-		//Layer of nodes.
-        public class Layer{
-            public Node[] nodes;
-            public Layer(Node[] nodes){
-                this.nodes = nodes;
-            }
-
-			/*
-				UPDATE LAYER DATA.
-			*/
-
-			public void updateValues(bool outputLayer){
-				foreach(Node node in nodes){
-					node.updateNodeValue(outputLayer);
-				}
-			}
-
-			//Sets nodes values manually. Used by first layer, which doesn't have "real" input Nodes.
-			public void setLayerValues(double[] values){
-				for(int i = 0; i < values.Length; i++){
-					nodes[i].value = values[i];
-				}
-			}
-
-			/*
-				GET INFO ABOUT LAYER.
-			*/
-			public double[] getLayerValues(){
-				double[] vals = new double[nodes.Length];
-				for(int i = 0; i < nodes.Length; i++){
-					vals[i] = nodes[i].value;
-				}
-				return vals;
-			}
-
-        }
-
-		//One node (neuron).
-        public class Node {
-            public Connection[] inputConnections;
-			public Connection[] outputConnections;
-			public double value;
-			public double bias;
-			public double biasDerivative = 0d;
-			public double errorTotal= 0d;
-			public double errorTotalDerivative=0d;
-            public Node(Connection[] inputConnections, double value = 0d, double bias = 0d, double errorTotal=0d){
-                this.inputConnections = inputConnections;
-				this.value = value;
-				this.bias = bias;
-				this.errorTotal=errorTotal;
-				this.outputConnections = new Connection[0];
-            }
-
-			/*
-				UPDATE NODE DATA.
-			*/
-
-			public void updateBias(double trainingStep, double dBias){
-				this.bias+=trainingStep*dBias;
-			}
-
-			public void updateBiasDerivative(bool outputLayer){
-				double error = this.errorTotalDerivative;
-				this.biasDerivative = error;
-			}
-
-			public void updateNodeValue(bool outputLayer){
-				double tmpVal = this.bias; 
-				foreach (Connection connection in this.inputConnections)
+				for( int j = 0; j < layerLengths[i]; j++)
 				{
-					tmpVal+=connection.nodeIn.value*connection.weight;
+					layerNodes[j] = new Node();
 				}
-				this.value = Activation(tmpVal,outputLayer);
-			}
+				layers[i] = new Layer(layerNodes, (i==layerLengths.Length-1), (i==0));
+            }
 
-			/* 
-				NODE ACTIVATION FUNCTION.
-			*/
-
-			private static double Activation(double x, bool outputLayer){
-				//SIGMOID
-				if(outputLayer){
-					return (1)/(1+Math.Exp(-x));
+			//INIT CONNECTIONS.
+			for(int i = layerLengths.Length-1; i >= 1 ; i--)
+			{
+				Layer layer = this.layers[i];
+				Layer prevLayer = this.layers[i - 1];
+				foreach (Node node in layer.nodes)
+				{
+					foreach (Node prevNode in prevLayer.nodes)
+					{
+						Connection con = new(prevNode, node, Connection.WeightInit(prevLayer.nodes.Length));
+                        node.inputConnections.Add(con);
+                        prevNode.outputConnections.Add(con);
+					}
 				}
-				//RELU
-				if(x>0d){
-					return x;
-				}
-				return 0d;
 			}
-
-			public static double Activation_Derivative(double x, bool outputLayer){
-				if(outputLayer){
-					//SIGMOID DERIVATIVE
-					double val = Activation(x,true);
-					return val*(1-val);				
-				}
-				//RELU DERIVATIVE
-				if(x>0d){
-					return 1;
-				}
-				return 0d;
-				
-			}
-
-			/*
-				ERROR CALCULATION.
-			*/
-			//Hidden Error.
-			public void setHiddenError(Connection[] connections){
-				double sumAllWeights = Connection.sumAllWeights(connections);
-				double hiddenError = 0d;
-				for(int i = 0; i < connections.Length; i++){
-					double error = connections[i].nodeOut.errorTotal*((connections[i].weight)/(sumAllWeights));
-					hiddenError+=error;
-				}
-				this.errorTotal=hiddenError;
-			}
-
-			public void setOutputError(double target){
-				this.errorTotal=errorSq(this.value,target); 
-			}
-
-			public void setErrorDerivative(){
-				this.errorTotalDerivative= -2*Math.Sqrt(this.errorTotal);
-			}
-
         }
-
-		//Connection from one node to another.
-		public class Connection {
-			public Node nodeIn;
-			public Node nodeOut;
-			public double weight;
-			public double weightDerivative = 0d;
+		
 
 
-			//NOTE: weight is, unless specified otherwise, init randomly between [-1/sqrt(InputLength),1/sqrt(InputLength)].
-			public Connection(Node nodeIn, Node nodeOut, double weight = 1d){
-				this.nodeIn = nodeIn;
-				this.nodeOut = nodeOut;
-				this.weight = weight;
+        /*
+			FORWARDPROPAGATION
+		*/
+        public double[] CalculateOutputs(double[] inputValues){
+			layers[0].SetLayerValues(inputValues);
+			for(int i = 1; i < layers.Length; i++){
+				Layer layer = layers[i];
+				layer.UpdateValues();
 			}
+			return layers[^1].GetLayerValues();
+		}
 
-			/*
-				UPDATE CONNECTION DATA.
-			*/
-			public void updateWeight(double trainingStep, double dWeight){
-				this.weight += trainingStep*dWeight;
-			}
-
-			public static double sumAllWeights(Connection[] connections){
-				double totalW = 0d;
-				for(int i = 0; i<connections.Length; i++){
-					totalW+=connections[i].weight;
+		/*
+			BACKPROPAGATION
+		*/
+		private void UpdateGradients(double[] expected){
+			for(int i = layers.Length-1; i >= 1; i--){
+				Layer layer = layers[i];
+				for(int j = 0; j < layer.nodes.Length; j++){
+					Node node = layer.nodes[j];
+					node.SetError(layer.outputLayer, (layer.outputLayer) ? expected[j] : 0d);
+					node.UpdateGradient(layer.outputLayer);
+                    node.AddBiasDerivative();
+                    foreach (Connection connection in node.inputConnections)
+                    {
+                        connection.AddWeightDerivative();
+                    }
 				}
-				return totalW;
-			}
-
-			public void updateWeightDerivative(bool outputLayer){
-				double errorOutputNodeDerivative = this.nodeOut.errorTotalDerivative;
-				double valueInputNode = this.nodeIn.value;
-				double valueOutputNode = this.nodeOut.value;
-				double activationDerivative = Node.Activation_Derivative(valueOutputNode,outputLayer)*valueInputNode;
-				this.weightDerivative = errorOutputNodeDerivative*activationDerivative;
 			}
 		}
+
+		/*
+			GRADIENT DESCENT ITERATION
+		*/
+		private void ApplyGradients(double trainingStep, double momentum)
+		{
+            for (int i = layers.Length - 1; i >= 1; i--)
+            {
+				foreach(Node node in layers[i].nodes)
+				{
+					node.UpdateBias(trainingStep, momentum);
+                    foreach (Connection connection in node.inputConnections)
+                    {
+                        connection.UpdateWeight(trainingStep, momentum);
+                    }
+                }
+            }
+        }
+
+		private void ClearGradients()
+		{
+			for(int i = layers.Length-2; i>=0; i--)
+			{
+				Layer layer = layers[i];
+				foreach(Node node in layer.nodes)
+				{
+					node.biasDerivative = 0d;
+					foreach(Connection outputCon in node.outputConnections){
+						outputCon.weightDerivative = 0d;
+					}
+				}
+			}
+		}
+
+
+        //Mini-batch gradient descent iteration
+        private void SGD(int batch, double trainingStep, double momentum, double[][] dataInput, double[][] dataOutput)
+		{
+			Random rand = new();
+			for(int i = 0; i < batch; i++) {
+				int index = rand.Next(0,dataInput.Length-1);
+                double[] batchInput = dataInput[index];
+                double[] batchOutput = dataOutput[index];
+                double[] calculates = CalculateOutputs(batchInput);
+                UpdateGradients(batchOutput);
+            }
+			ApplyGradients(trainingStep/batch, momentum);
+            ClearGradients();
+        }
+
+		public void Train(int epochs, int iterations, int batch, double trainingStep, double momentum, double[][] trainingDataInput, double[][] trainingDataOutput)
+		{
+            for (int epochI = 0; epochI < epochs; epochI++)
+			{
+				Console.WriteLine($"Starting epoch {epochI+1}");
+				for(int iterationI = 0; iterationI < iterations; iterationI++)
+				{
+					SGD(batch, trainingStep, momentum, trainingDataInput, trainingDataOutput);
+				}
+			}
+		}
+		public void Test(double[][] testDataInput, double[][] testDataOutput)
+		{
+			Console.WriteLine($@"
+			MSE_COST : {Cost.CostMultipleFunction(testDataOutput, testDataInput)}
+			----------------------");
+
+			
+        }
     }
 }

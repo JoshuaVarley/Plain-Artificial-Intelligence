@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "7rTe0Y+8CgPhDykpaUkRghaJEdqJJySgAUbRzhxjmzyUhtMJmrvOZCya8c345R712g9ySUHlhH3rHfC3oxkjTQ==",
+  "dgSpecHash": "jkye281ZDJu9oPUfbvms69kTxON1y44BWYEAaebvA2DRSXPujvD8SciofY0i34M5szbkV0Sa5oAs555dAgVkww==",
   "success": true,
   "projectFilePath": "/Users/areolsen/Projects/Neural network/Neural network/Neural network.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/Users/areolsen/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
   "logs": []
 }
