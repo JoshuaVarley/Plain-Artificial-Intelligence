@@ -13,3 +13,5 @@
 /Users/areolsen/Projects/Neural network/Neural network/obj/Release/net7.0/Neural network.pdb
 /Users/areolsen/Projects/Neural network/Neural network/obj/Release/net7.0/Neural network.genruntimeconfig.cache
 /Users/areolsen/Projects/Neural network/Neural network/obj/Release/net7.0/ref/Neural network.dll
+/Users/areolsen/Projects/Neural network/Neural network/bin/Release/net7.0/Newtonsoft.Json.dll
+/Users/areolsen/Projects/Neural network/Neural network/obj/Release/net7.0/Neural network.csproj.CopyComplete

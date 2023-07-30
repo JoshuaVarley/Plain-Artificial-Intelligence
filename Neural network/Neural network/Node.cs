@@ -8,15 +8,13 @@
         public double bias;
         public double biasDerivative = 0d;
         public double biasVelocity = 0d;
-        public double error = 0d;
         public double errorDerivative = 0d;
         public double gradient = 0d;
 
-        public Node(double value = 0d, double bias = 0d, double error = 0d)
+        public Node(double value = 0d, double bias = 0d)
         {
             this.value = value;
             this.bias = bias;
-            this.error = error;
         }
 
         /*
@@ -35,9 +33,15 @@
             biasDerivative += gradient;
         }
 
-        public void UpdateGradient(bool outputLayer)
+        public void UpdateGradient(Layer curLayer)
         {
-            gradient = errorDerivative * Activation_Derivative(value, outputLayer);
+            if (curLayer.outputLayer)
+            {
+                gradient = errorDerivative * Activations.SoftMax.Derivative(curLayer.GetLayerValues(),value);
+            } else
+            {
+                gradient = errorDerivative * Activations.SILU.Derivative(value);
+            }
         }
 
 
@@ -50,53 +54,18 @@
             return net;
         }
 
-
-        /* 
-            NODE ACTIVATION FUNCTION.
-        */
-        public static double Activation(double x, bool outputLayer)
-        {
-            //SIGMOID
-            if (outputLayer)
-            {
-                return (1.0d) / (1.0d + Math.Exp(-x));
-            }
-            //LEAKY_RELU
-            if (x >= 0d)
-            {
-                return x;
-            }
-            return 0.01d * x;
-        }
-
-        public static double Activation_Derivative(double x, bool outputLayer)
-        {
-            //SIGMOID DERIVATIVE
-            if (outputLayer)
-            {
-                double val = Activation(x, outputLayer);
-                return val * (1.0d - val);
-            }
-            //LEAKY_RELU DERIVATIVE
-            if (x >= 0d)
-            {
-                return 1d;
-            }
-            return 0.01d;
-        }
-
-
         /*
             SET ERROR.
         */
         public void SetError(bool outputLayer, double target = 0d)
         {
+            //Output error.
             if (outputLayer)
             {
-                error = Cost.CostFunctionIteration(target, value);
-                errorDerivative = Cost.CostFunctionIterationDerivative(target, value);
+                errorDerivative = Cost.MSE.CostFunctionIterationDerivative(target, value);
             } else
             {
+                //Hidden layer derivative.
                 List<Connection> connections = outputConnections;
                 double sumW = connections.Sum(a=>a.weight);
                 errorDerivative = connections.Sum(con => (con.nodeOut.errorDerivative * con.weight)/sumW);

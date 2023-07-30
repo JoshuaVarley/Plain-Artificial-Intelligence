@@ -20,7 +20,13 @@
         {
             foreach (Node node in nodes)
             {
-                node.value = Node.Activation(node.GetNetActivationInput(), outputLayer);
+                if (outputLayer)
+                {
+                    node.value = Activations.SoftMax.Activation(GetLayerNetInputs(),node.GetNetActivationInput());
+                } else
+                {
+                    node.value = Activations.SILU.Activation(node.GetNetActivationInput());
+                }
             }
         }
 
@@ -46,6 +52,16 @@
                 vals[i] = nodes[i].value;
             }
             return vals;
+        }
+
+        public double[] GetLayerNetInputs()
+        {
+            double[] nets = new double[nodes.Length];
+            for(int i = 0;  i < nets.Length; i++)
+            {
+                nets[i] = nodes[i].GetNetActivationInput();
+            }
+            return nets;
         }
     }
 }
