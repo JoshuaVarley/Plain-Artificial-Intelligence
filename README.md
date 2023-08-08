@@ -5,4 +5,6 @@ By default, it uses, ReLU combined with Softmax as the activation functions, and
 After 8 epochs it reached a percentage correctly guessed on the MNIST test data of approx. 97%.
 The network can be saved and loaded using Binary Serialization.
 
+Feel free to add any changes to the code that may help the network learn better :)
+
 <img width="510" alt="PIE" src="https://github.com/AreOlsen/Plain-Neural-Network/assets/58704301/1c914f89-2d59-44ce-a915-be0010bc0c4c">
