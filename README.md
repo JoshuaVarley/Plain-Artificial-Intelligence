@@ -4,7 +4,7 @@ This is a simple neural network trained on MNIST, as a learning experience, it i
 By default, it uses, ReLU combined with Softmax as the activation functions, and Binary Cross entropy as the loss function, but other activation functions and loss functions are included.
 After 8 epochs it reached a percentage correctly guessed on the MNIST test data of approx. 97%.
 The network can be saved and loaded using Binary Serialization.
-
+In the future, this project will be attempted to be multithreaded.
 Feel free to add any changes to the code that may help the network learn better :)
 
 <img width="510" alt="paipic" src="https://github.com/AreOlsen/Plain-Neural-Network/assets/58704301/eaff9bd8-4ed0-4eb0-a867-408890094887">
