@@ -1,5 +1,5 @@
-# Plain-Neural-Network
-PAI - Plain Neural Network, written in C#, from scratch.
+# Plain Artificial Intelligence
+PAI - Plain Artificial Intelligence, written in C#, from scratch.
 This is a simple neural network trained on MNIST, as a learning experience, it is easily configurable in code and can be reworked to fit every need.
 By default, it uses, ReLU combined with Softmax as the activation functions, and Binary Cross entropy as the loss function, but other activation functions and loss functions are included.
 After 8 epochs it reached a percentage correctly guessed on the MNIST test data of approx. 97%.
